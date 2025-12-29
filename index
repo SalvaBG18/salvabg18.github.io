@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mario Drunk: World</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --mario-red: #E52521; --mario-blue: #049CD8;
+            --mario-yellow: #FBD000; --mario-green: #43B047;
+            --sky-blue: #73D2FF; --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32;
+            --white: #FFFFFF;
+        }
+        body {
+            font-family: 'Fredoka One', cursive; 
+            background: var(--sky-blue);
+            background-image: radial-gradient(circle, #ffffff 10%, transparent 10%);
+            background-size: 30px 30px;
+            color: #333; margin: 0; padding: 10px; overflow-x: hidden;
+        }
+        .container {
+            max-width: 600px; margin: auto; background: rgba(255, 255, 255, 0.95);
+            padding: 20px; border-radius: 30px; border: 8px solid var(--mario-red);
+            text-align: center; min-height: 90vh; box-shadow: 0 15px 0 rgba(0,0,0,0.1);
+        }
+        .hidden { display: none; }
+        .logo { width: 100%; max-width: 400px; margin-bottom: 10px; cursor: pointer; filter: drop-shadow(2px 4px 0px rgba(0,0,0,0.2)); transition: 0.3s; }
+        .logo:hover { transform: scale(1.05); }
+        
+        h1, h2 { color: var(--mario-red); text-shadow: 2px 2px var(--mario-yellow); -webkit-text-stroke: 1px #8a1512; }
+        
+        button {
+            font-family: 'Fredoka One'; padding: 15px 20px; border: none;
+            border-radius: 20px; cursor: pointer; transition: 0.1s;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.2); margin: 5px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        button:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+        
+        .btn-main { background: var(--mario-green); color: white; font-size: 1.2rem; width: 100%; margin-top: 15px; }
+        .btn-nav { background: var(--mario-blue); color: white; flex: 1; }
+        .btn-archive { background: #ff7f00; color: white; width: 100%; font-size: 1.1rem; }
+
+        .tournament-title { 
+            background: var(--mario-yellow); color: var(--mario-red); 
+            padding: 10px; border-radius: 15px; border: 4px solid var(--mario-red); 
+            margin-bottom: 20px; font-size: 1.4rem; box-shadow: 0 4px 0 var(--mario-red);
+        }
+
+        .group-card { background: white; padding: 15px; border-radius: 25px; border: 4px solid var(--mario-blue); margin: 20px 0; }
+        .gp-title { color: var(--mario-blue); font-size: 1.6rem; margin-bottom: 15px; background: #e1f5ff; border-radius: 15px; padding: 5px; }
+        
+        .player-row { background: #f9f9f9; padding: 15px; border-radius: 20px; margin-bottom: 12px; border: 2px solid #eee; }
+        .race-inputs { display: flex; gap: 8px; margin-top: 10px; justify-content: center; }
+        .pts-input { 
+            width: 50px; height: 45px; border-radius: 12px; border: 3px solid var(--mario-blue); 
+            text-align: center; font-family: 'Fredoka One'; background: white; color: var(--mario-red); font-size: 1.1rem;
+        }
+
+        .points-reference { font-size: 0.8rem; color: #666; margin-bottom: 10px; }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        td { padding: 15px; background: white; border: 3px solid #eee; border-radius: 15px; font-size: 1.1rem; }
+        .gold-row td { background: #fff9c4; border-color: var(--gold); color: #827717; font-weight: bold; }
+        .silver-row td { background: #f0f0f0; border-color: var(--silver); color: #616161; }
+        .bronze-row td { background: #efebe9; border-color: var(--bronze); color: #4e342e; }
+
+        input[type="text"], input[type="number"] { 
+            padding: 12px; border-radius: 15px; border: 3px solid var(--mario-blue); 
+            font-family: 'Fredoka One'; box-sizing: border-box;
+        }
+        select { padding: 10px; border-radius: 15px; border: 3px solid var(--mario-green); font-family: 'Fredoka One'; width: 100%; background: white; }
+
+        .archive-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; margin-bottom: 10px; border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://raw.githubusercontent.com/SalvaBG18/salvabg18.github.io/main/MarioDrunk_Logo.png" class="logo" onclick="location.reload()">
+    <div id="active-tournament-name" class="tournament-title hidden"></div>
+
+    <div id="view-home">
+        <h1>🍄 MENÚ PRINCIPAL 🍄</h1>
+        <div style="margin-top:20px;">
+            <input type="text" id="tournament-input" placeholder="Nombre de la copa..." style="width:100%; text-align: center; font-size: 1.2rem;">
+            <button class="btn-main" onclick="initTournament()">🚀 EMPEZAR PARTIDA</button>
+            <button class="btn-archive" onclick="openArchive()">📚 ARCHIVO DE COPAS</button>
+        </div>
+    </div>
+
+    <div id="view-archive" class="hidden">
+        <h2>📜 HISTORIAL</h2>
+        <div id="archive-list"></div>
+        <button class="btn-nav" onclick="showView('view-home')" style="width:100%;">🏠 VOLVER</button>
+    </div>
+
+    <div id="view-setup" class="hidden">
+        <h2>👥 PILOTOS (MÍN. 12)</h2>
+        <div id="setup-list"></div>
+        <button onclick="addParticipantRow()" style="background:var(--mario-blue); color:white; width: 100%;">➕ AÑADIR OTRO</button>
+        <button class="btn-main" onclick="startBrackets()">🎲 CREAR GRUPOS ALEATORIOS</button>
+    </div>
+
+    <div id="view-brackets" class="hidden">
+        <h2 id="round-header">🏎️ RONDA 1</h2>
+        <p class="points-reference">Puntos MK8: 15, 12, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1</p>
+        <div id="group-display"></div>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button id="prevBtn" class="btn-nav" onclick="changeGroup(-1)">👈 ANTERIOR</button>
+            <button id="nextBtn" class="btn-nav" onclick="changeGroup(1)">SIGUIENTE 👉</button>
+        </div>
+        <button id="finishBtn" class="btn-main hidden" onclick="renderRankingView()">🏁 VER CLASIFICACIÓN FINAL</button>
+    </div>
+
+    <div id="view-ranking" class="hidden">
+        <h2>📊 RANKING FINAL</h2>
+        <table><tbody id="ranking-body"></tbody></table>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn-nav" id="back-to-brackets" onclick="showView('view-brackets')">✏️ CORREGIR</button>
+            <button class="btn-nav" style="background:var(--mario-green)" onclick="showView('view-podium')">🌟 PODIO</button>
+        </div>
+    </div>
+
+    <div id="view-podium" class="hidden">
+        <h2>🏆 CEREMONIA FINAL 🏆</h2>
+        <div class="group-card" style="border-color: var(--gold);">
+            <span style="font-size:3rem;">🥇</span><br>
+            <select id="win-gold" style="border-color: var(--gold); margin-top:10px;"></select>
+        </div>
+        <div class="group-card" style="border-color: var(--silver);">
+            <span style="font-size:2.5rem;">🥈</span><br>
+            <select id="win-silver" style="border-color: var(--silver); margin-top:10px;"></select>
+        </div>
+        <div class="group-card" style="border-color: var(--bronze);">
+            <span style="font-size:2rem;">🥉</span><br>
+            <select id="win-bronze" style="border-color: var(--bronze); margin-top:10px;"></select>
+        </div>
+        <button class="btn-main" onclick="saveToArchive()">💾 GUARDAR EN EL ARCHIVO</button>
+    </div>
+</div>
+
+<script>
+    let players = [], allGroups = [], currentGroupIdx = 0, currentTName = "";
+    const characters = ["Mario 🔴", "Luigi 🟢", "Wario 🟡", "Waluigi 🟣", "Peach 💖", "Daisy 🍑", "Yoshi 🦖", "Toad 🍄", "Donkey Kong 🦍", "Bowser 🔥", "Bowsy 🔥🍼", "Rosalina 🌠", "Koopa 🐢", "Huesitos 🦴", "Shy Guy 🎭", "Link 🗡️", "Canela 🐶", "Inkling 🦑"];
+
+    function showView(v) {
+        document.querySelectorAll('.container > div').forEach(d => { if(d.id) d.classList.add('hidden') });
+        document.getElementById(v).classList.remove('hidden');
+        window.scrollTo(0,0);
+    }
+
+    function initTournament() {
+        currentTName = document.getElementById('tournament-input').value || "COPA MUSHROOM " + new Date().toLocaleDateString();
+        document.getElementById('active-tournament-name').innerText = "⭐ " + currentTName + " ⭐";
+        document.getElementById('active-tournament-name').classList.remove('hidden');
+        showView('view-setup');
+    }
+
+    function addParticipantRow() {
+        const div = document.createElement('div');
+        div.className = "player-row";
+        div.innerHTML = `
+            <input type="text" placeholder="Nombre del piloto" class="p-name" style="width:100%; margin-bottom:10px;"> 
+            <select class="p-char">${characters.map(c=>`<option>${c}</option>`).join('')}</select>`;
+        document.getElementById('setup-list').appendChild(div);
+    }
+
+    function startBrackets() {
+        const names = document.querySelectorAll('.p-name');
+        const pChars = document.querySelectorAll('.p-char');
+        players = [];
+        names.forEach((n, i) => { 
+            if(n.value.trim()) {
+                players.push({ id: i, name: n.value, char: pChars[i].value, scores: Array(8).fill(0), total: 0 }); 
+            }
+        });
+
+        if(players.length < 12) return alert("¡Mamma Mia! Necesitas al menos 12 pilotos para jugar.");
+        
+        // Sorteo aleatorio para 2 rondas
+        const r1 = chunkArray([...players].sort(() => 0.5 - Math.random()), 4);
+        const r2 = chunkArray([...players].sort(() => 0.5 - Math.random()), 4);
+        
+        allGroups = [
+            ...r1.slice(0,3).map((g,i)=>({r:1, n:i+1, p:g})), 
+            ...r2.slice(0,3).map((g,i)=>({r:2, n:i+4, p:g}))
+        ];
+        
+        currentGroupIdx = 0;
+        renderGroup();
+        showView('view-brackets');
+    }
+
+    function renderGroup() {
+        const data = allGroups[currentGroupIdx];
+        document.getElementById('round-header').innerText = `🏎️ RONDA ${data.r}`;
+        let html = `<div class="group-card"><div class="gp-title">🏁 GP ${data.n}</div>`;
+        
+        data.p.forEach(p => {
+            const startIdx = (data.r - 1) * 4;
+            html += `<div class="player-row">
+                <strong>${p.name}</strong> <small>${p.char}</small>
+                <div class="race-inputs">
+                    ${[0,1,2,3].map(c => `
+                        <input type="number" class="pts-input" 
+                        value="${p.scores[startIdx+c] || ''}" 
+                        placeholder="0"
+                        onchange="updSc(${p.id}, ${startIdx+c}, this.value)">`).join('')}
+                </div>
+            </div>`;
+        });
+        document.getElementById('group-display').innerHTML = html + `</div>`;
+        
+        document.getElementById('prevBtn').disabled = currentGroupIdx === 0;
+        document.getElementById('nextBtn').classList.toggle('hidden', currentGroupIdx === 5);
+        document.getElementById('finishBtn').classList.toggle('hidden', currentGroupIdx !== 5);
+    }
+
+    function updSc(id, idx, val) { 
+        const p = players.find(x => x.id === id);
+        p.scores[idx] = parseInt(val) || 0; 
+        p.total = p.scores.reduce((a, b) => a + b, 0); 
+    }
+
+    function changeGroup(d) { 
+        currentGroupIdx += d; 
+        renderGroup(); 
+    }
+
+    function renderRankingView() {
+        const body = document.getElementById('ranking-body'); 
+        body.innerHTML = '';
+        const sorted = [...players].sort((a,b) => b.total - a.total);
+        
+        // Llenar selectores de podio
+        const selectors = ['win-gold', 'win-silver', 'win-bronze'];
+        selectors.forEach(s => {
+            const select = document.getElementById(s);
+            select.innerHTML = sorted.map(p => `<option>${p.name} (${p.total} pts)</option>`).join('');
+        });
+
+        sorted.forEach((p, i) => {
+            let cls = i < 4 ? 'gold-row' : (i < 8 ? 'silver-row' : 'bronze-row');
+            let icon = i === 0 ? '👑' : (i < 4 ? '⭐' : '🏎️');
+            body.innerHTML += `<tr class="${cls}"><td>${icon} ${i+1}º</td><td>${p.name} <br><small>${p.char}</small></td><td>${p.total} pts</td></tr>`;
+        });
+        showView('view-ranking');
+    }
+
+    function saveToArchive() {
+        const entry = {
+            name: currentTName,
+            ranking: document.getElementById('ranking-body').innerHTML,
+            winners: { 
+                g: document.getElementById('win-gold').value, 
+                s: document.getElementById('win-silver').value, 
+                b: document.getElementById('win-bronze').value 
+            }
+        };
+        let arch = JSON.parse(localStorage.getItem('marioArchive')) || [];
+        arch.push(entry);
+        localStorage.setItem('marioArchive', JSON.stringify(arch));
+        alert("¡Copa guardada con éxito!");
+        location.reload();
+    }
+
+    function openArchive() {
+        const list = document.getElementById('archive-list');
+        list.innerHTML = '';
+        const arch = JSON.parse(localStorage.getItem('marioArchive')) || [];
+        if(arch.length === 0) {
+            list.innerHTML = "<p>🍌 No hay copas guardadas.</p>";
+        } else {
+            arch.reverse().forEach((t, i) => {
+                list.innerHTML += `<div class="archive-item player-row">
+                    <div style="text-align:left">
+                        <strong style="color:var(--mario-red)">${t.name}</strong><br>
+                        <small>🥇 ${t.winners.g.split('(')[0]}</small>
+                    </div>
+                    <button onclick="viewHistory(${arch.length - 1 - i})" style="background:var(--mario-blue); color:white; padding:8px 15px; font-size:0.8rem;">VER</button>
+                </div>`;
+            });
+        }
+        showView('view-archive');
+    }
+
+    function viewHistory(idx) {
+        const t = JSON.parse(localStorage.getItem('marioArchive'))[idx];
+        document.getElementById('active-tournament-name').innerText = "📖 ARCHIVO: " + t.name;
+        document.getElementById('active-tournament-name').classList.remove('hidden');
+        document.getElementById('ranking-body').innerHTML = t.ranking;
+        document.getElementById('back-to-brackets').classList.add('hidden');
+        showView('view-ranking');
+    }
+
+    function chunkArray(a, s) { 
+        let r = []; 
+        for(let i=0; i<a.length; i+=s) r.push(a.slice(i, i+s)); 
+        return r; 
+    }
+
+    // Inicializar con 12 filas vacías
+    for(let i=0; i<12; i++) addParticipantRow();
+</script>
+</body>
+</html>
